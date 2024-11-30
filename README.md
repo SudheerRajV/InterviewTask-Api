@@ -27,8 +27,8 @@ This project is simple Node application built as part of an interview task.
     - Payload:
       ```
       {
-      "email": "user@example.com",
-      "password": "password123"
+      "email": "sudheer@gmail.com",
+      "password": "12345678"
       }
       ```
   - Response:
