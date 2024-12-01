@@ -1,44 +1,29 @@
-import { Request, Response, NextFunction } from "express";
-import jwt, { JwtPayload } from "jsonwebtoken";
+// src/middleware/auth.ts
+import { Request, Response, NextFunction } from 'express';
+import jwt from 'jsonwebtoken';
+import { configKeys } from '../config/keys';
 
-const JWT_SECRET = process.env.JWT_SECRET || "secret";
+const secretKey = configKeys.SECRET_KEY
 
-export interface DecodedToken extends JwtPayload {
-    email: string;
-    firstName: string;
-  }
-  
-const verifyToken = (token: string): DecodedToken | null => {
-    try {
-      const decoded = jwt.verify(token, JWT_SECRET) as DecodedToken;
-      return decoded;
-    } catch (error) {
-      console.error("JWT verification failed:", error);
-      return null;
-    }
-  };
+export type User = {}
 
-export interface AuthenticatedRequest extends Request {
-  user?: DecodedToken;
+export interface LanguageRequest extends Request {
+  user: User
 }
 
-export const authenticate = (
-  req: AuthenticatedRequest,
-  res: Response,
-  next: NextFunction
-) => {
-  const token = req.headers.authorization?.split(" ")[1];
-  
+export const authenticate : any = (req: LanguageRequest, res: Response, next: NextFunction) => {
+  const token = req.header('Authorization')?.replace('Bearer ', '');
+  //console.log('token', token);
   if (!token) {
-    return res.status(401).json({ message: "Access Denied: No token provided." });
+    return res.status(401).json({ message: 'No token provided' });
   }
 
-  const decoded = verifyToken(token);
-
-  if (!decoded) {
-    return res.status(401).json({ message: "Invalid or expired token." });
-  }
-
-  req.user = decoded; // Attach the decoded token data to the request
-  next();
+  jwt.verify(token, secretKey, (err, user) => {
+    if (err) {
+      return res.status(401).json({ message: 'Invalid token' });
+    }
+   // console.log('user', user);
+    req.user = {user};
+    next();
+  });
 };

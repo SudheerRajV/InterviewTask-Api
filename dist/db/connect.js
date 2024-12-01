@@ -15,13 +15,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.connectToDatabase = void 0;
 const mongodb_1 = require("mongodb");
 const dotenv_1 = __importDefault(require("dotenv"));
+const keys_1 = require("../config/keys");
 dotenv_1.default.config();
 let db;
 const connectToDatabase = () => __awaiter(void 0, void 0, void 0, function* () {
     console.log("db", db);
     if (db)
         return db;
-    const URI = process.env.DB_URL;
+    const URI = process.env.DB_URL || keys_1.configKeys.DB_URL;
     console.log("URI", URI);
     if (!URI)
         throw new Error("Invalid MongoDB connection string");

@@ -27,7 +27,6 @@ router.post(
   "/register",
   async (req: Request, res: Response): Promise<any> => {
     const { email, password, firstName, lastName } = req.body;
-    console.log("req.body", email, password );
     if (!email || !password) {
       return res.status(400).json({ message: "Email and password are required" });
     }
@@ -35,22 +34,18 @@ router.post(
     try {
       const db = await connectToDatabase();
       const usersCollection = db.collection<User>("users");
-      //console.log("usersCollection", usersCollection);
       const existingUser = await usersCollection.findOne({ email });
-      //console.log("existingUser", existingUser);
       if (existingUser) {
         return res.status(400).json({ message: "Email is already registered" });
       }
 
       const hashedPassword = await bcrypt.hash(password, 10);
-      //console.log("hashedPassword", hashedPassword);
       const result = await usersCollection.insertOne({
         email,
         firstName,
         lastName,
         password: hashedPassword,
       });
-        console.log("result", result);
       if (!result.insertedId) {
         return res.status(500).json({ message: "Failed to create user" });
       }
@@ -70,7 +65,6 @@ router.post(
   "/login",
   async (req: Request, res: Response): Promise<any> => {
     const { email, password } = req.body;
-    console.log('req.body',req.body);
     if (!email || !password) {
       return res.status(400).json({ message: "Email and password are required" });
     }
@@ -80,7 +74,6 @@ router.post(
       const usersCollection = db.collection<User>("users");
 
       const user = await usersCollection.findOne({ email });
-      console.log('user',user);
       if (!user) {
         return res.status(401).json({ message: "Invalid email or password" });
       }
@@ -89,11 +82,9 @@ router.post(
       if (!isMatch) {
         return res.status(401).json({ message: "Invalid email or password" });
       }
-      console.log('isMatch',isMatch);
       const token = jwt.sign({ email: user.email,firstName: user.firstName  }, JWT_SECRET, {
         expiresIn: "1h",
       });
-      console.log('token',token);
       res.status(200).json({ token });
     } catch (error) {
       res.status(500).json({ message: "Server error", error });
@@ -102,11 +93,11 @@ router.post(
 );
 
 // Product list Route
-router.post(
-  "/products",
+router.get(
+  "/products",authenticate,
   async (req: Request, res: Response): Promise<any> => {
     try {
-      res.status(200).json({ productsList:  products});
+      res.status(200).json({ data:  products});
     } catch (error) {
       res.status(500).json({ message: "Server error", error });
     }

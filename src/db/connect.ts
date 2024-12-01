@@ -6,11 +6,9 @@ dotenv.config();
 let db: Db;
 
 export const connectToDatabase = async (): Promise<Db> => {
-    console.log("db", db );
   if (db) return db;
 
   const URI = process.env.DB_URL || configKeys.DB_URL;
-  console.log("URI", URI );
   if(!URI)
     throw new Error("Invalid MongoDB connection string");
 

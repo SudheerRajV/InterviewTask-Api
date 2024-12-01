@@ -16,7 +16,8 @@ This project is simple Node application built as part of an interview task.
 ## Steps to Run Locally
 - Clone the repository.
 - Install dependencies.
-- Start the development server(npm start).
+- Build the server(npm run build).
+- Start the development server(npm run start).
 - Use Postman or any API client to make requests to(http://localhost:5001).
 
 ## API Documentation

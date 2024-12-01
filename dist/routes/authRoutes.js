@@ -16,8 +16,11 @@ const express_1 = __importDefault(require("express"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const connect_1 = require("../db/connect");
+const authenticate_1 = require("../middleware/authenticate");
+const products_1 = require("../db/products");
+const keys_1 = require("../config/keys");
 const router = express_1.default.Router();
-const JWT_SECRET = process.env.JWT_SECRET || "default_secret_key";
+const JWT_SECRET = process.env.JWT_SECRET || keys_1.configKeys.SECRET_KEY;
 router.get("/ping", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     return res.status(200).json({ message: "Welcome to apis" });
 }));
@@ -61,6 +64,7 @@ router.post("/register", (req, res) => __awaiter(void 0, void 0, void 0, functio
 // Sign In Route
 router.post("/login", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { email, password } = req.body;
+    console.log('req.body', req.body);
     if (!email || !password) {
         return res.status(400).json({ message: "Email and password are required" });
     }
@@ -68,6 +72,7 @@ router.post("/login", (req, res) => __awaiter(void 0, void 0, void 0, function* 
         const db = yield (0, connect_1.connectToDatabase)();
         const usersCollection = db.collection("users");
         const user = yield usersCollection.findOne({ email });
+        console.log('user', user);
         if (!user) {
             return res.status(401).json({ message: "Invalid email or password" });
         }
@@ -75,10 +80,21 @@ router.post("/login", (req, res) => __awaiter(void 0, void 0, void 0, function* 
         if (!isMatch) {
             return res.status(401).json({ message: "Invalid email or password" });
         }
+        console.log('isMatch', isMatch);
         const token = jsonwebtoken_1.default.sign({ email: user.email, firstName: user.firstName }, JWT_SECRET, {
             expiresIn: "1h",
         });
+        console.log('token', token);
         res.status(200).json({ token });
+    }
+    catch (error) {
+        res.status(500).json({ message: "Server error", error });
+    }
+}));
+// Product list Route
+router.get("/products", authenticate_1.authenticate, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        res.status(200).json({ data: products_1.products });
     }
     catch (error) {
         res.status(500).json({ message: "Server error", error });
